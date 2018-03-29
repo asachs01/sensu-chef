@@ -25,7 +25,7 @@ when "debian"
 
   apt_repository "sensu" do
     uri node["sensu"]['apt_repo_url']
-    key "#{node['sensu']['apt_repo_url']}/pubkey.gpg"
+    key node['sensu']['apt_key_url']
     distribution node["sensu"]["apt_repo_codename"] || node["lsb"]["codename"]
     components node["sensu"]["use_unstable_repo"] ? ["unstable"] : ["main"]
     action :add
@@ -44,16 +44,37 @@ when "debian"
     options package_options
     notifies :create, "ruby_block[sensu_service_trigger]"
   end
+when "suse"
+  repo = zypper_repo 'sensu' do
+    repo_name 'sensu'
+    repo = node["sensu"]["use_unstable_repo"] ? "yum-unstable" : "yum"
+    uri "#{node['sensu']['yum_repo_url']}/#{repo}/7/x86_64/"
+    gpgkey node['sensu']['yum_key_url']
+  end
+  repo.gpgcheck(true) if repo.respond_to?(:gpgcheck)
+
+  # As of 0.27 we need to suffix the version string with the platform major
+  # version, e.g. ".el7". Override default via node["sensu"]["version_suffix"]
+  # attribute.
+  zypper_package "sensu" do
+    version lazy { "1:" + Sensu::Helpers.redhat_version_string(
+      node["sensu"]["version"],
+      7,
+      node["sensu"]["version_suffix"]
+    )}
+    notifies :create, "ruby_block[sensu_service_trigger]"
+  end
 when "rhel", "fedora", "amazon"
   repo = yum_repository "sensu" do
     description "sensu monitoring"
     repo = node["sensu"]["use_unstable_repo"] ? "yum-unstable" : "yum"
     releasever_string = node["sensu"]["yum_repo_releasever"] || "$releasever"
     baseurl "#{node['sensu']['yum_repo_url']}/#{repo}/#{releasever_string}/$basearch/"
+    gpgkey node['sensu']['yum_key_url']
     action :add
     only_if { node["sensu"]["add_repo"] }
   end
-  repo.gpgcheck(false) if repo.respond_to?(:gpgcheck)
+  repo.gpgcheck(true) if repo.respond_to?(:gpgcheck)
 
   # As of 0.27 we need to suffix the version string with the platform major
   # version, e.g. ".el7". Override default via node["sensu"]["version_suffix"]
@@ -65,6 +86,7 @@ when "rhel", "fedora", "amazon"
       node["sensu"]["version_suffix"]
     )}
     allow_downgrade true
+    flush_cache node['sensu']['yum_flush_cache'] unless node['sensu']['yum_flush_cache'].nil?
     notifies :create, "ruby_block[sensu_service_trigger]"
   end
 else

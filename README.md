@@ -182,6 +182,8 @@ detected by ohai for purposes of configuring the apt repository definition.
 `node["sensu"]["yum_repo_releasever"]` - Override `$releasever` string
 used in yum repository definition.
 
+`node['sensu']['yum_flush_cache']` - Override chefs in memory cache of yum cache during a `chef-client` run. For more information see [here](https://docs.chef.io/resource_yum.html).
+
 `node["sensu"]["directory"]` - Sensu configuration directory.
 
 `node["sensu"]["log_directory"]` - Sensu log directory.
@@ -345,6 +347,52 @@ sensu_snippet "irc" do
 end
 ```
 
+### Install plugins
+```ruby
+# define a hash of plugins (gems) WITH VERSIONS PINNED
+default['MY_CUSTOM_NAMESPACE']['sensu']['plugins'] = {
+  ## pretty much all checks rely on this
+  'sensu-plugin' => '2.1.0',
+  ## check consul
+  'sensu-plugins-consul' => '1.4.1',
+  ## check cpu
+  'sensu-plugins-cpu-checks' => '1.1.2',
+  ## check disks
+  'sensu-plugins-disk-checks' => '2.4.0',
+  ## check disks
+  'sensu-plugins-http' => '2.6.0',
+  ## check elasticsearch
+  'sensu-plugins-elasticsearch' => '1.5.1',
+  ## check load
+  'sensu-plugins-load-checks' => '3.0.0',
+  ## check memory
+  'sensu-plugins-memory-checks' => '3.0.2',
+  ## check network
+  'sensu-plugins-network-checks' => '2.0.1',
+  ## check processes
+  'sensu-plugins-process-checks' => '2.4.0',
+  ## check rabbitmq
+  'sensu-plugins-rabbitmq' => '3.2.0',
+  ## check redis
+  'sensu-plugins-redis' => '2.0.0',
+  ## check chef
+  'sensu-plugins-chef' => '3.0.2',
+  'hashie' => '3.5.6',
+  ## check nginx
+  'sensu-plugins-nginx' => '2.2.0'
+}
+
+# loop over each gem and install it into the sensu embedded ruby
+node['MY_CUSTOM_NAMESPACE']['sensu']['plugins'].each do |plugin, version|
+  sensu_gem plugin do
+    version version
+  end
+end
+```
+
+To install gems with a Ruby other than the Sensu embedded Ruby, use Chef's [gem_package](https://docs.chef.io/resource_gem_package.html) in stead of `sensu_gem`.
+
+
 ## Helper modules and methods
 
 ### Run State Helpers
@@ -386,3 +434,15 @@ When no value is set for a requested path, this method returns `nil`:
 
 Please visit [sensuapp.org/support](http://sensuapp.org/support) for details on community and commercial
 support resources, including the official IRC channel.
+
+## Build and Release
+
+For maintainers looking to release new versions of this cookbook you should follow this process:
+1. Add any `README.md` and `CHANGELOG.md` changes with links to Pull Requests. Commit this to develop branch.
+1. Update `CHANGELOG.md` with new version header and update diff links.
+1. Create a commit to then tag for release I would suggest something like this `git commit -am 'prep for v$MAJOR.$MINOR.$RELEASE release'`. Commit this to develop and make sure that everything is good to go (ci passing and such).
+1. Push from develop to master: `git push origin develop:master`
+1. checkout master branch and pull in changes: `git checkout master && git pull`
+1. Create a tagged release: `hub release create v$MAJOR.$MINOR.$PATCH` this should prompt you in an editor to modify the tag message. I typically leave it default, but feel free to include any useful release notes.
+1. Use the `stove` command to push the newly versioned cookbook to the supermarket: `stove --no-git`. This assumes that you have installed `stove`, properly configured authentication, and have been granted access to the supermarket.
+1. Optionally but recommended to update any associated PRs with a release link.

@@ -5,6 +5,48 @@ cookbook. Please see HISTORY.md for changes from older versions of this project.
 
 ## [Unreleased]
 
+## [4.3.0] - 2018-03-28
+### Added
+- pulling in latest release `redisio` cookbook to fix chef 13 compatibility (@majormoses)
+
+## [4.2.1] - 2018-03-04
+### Security
+* Enable gpg check for all linux repo installs using a key downloaded over HTTPS. Download windows MSI over HTTPS. #578 (@mike-stewart)
+
+## [4.2.0] - 2018-02-16
+### Added
+* native support for proxy client checks (formerly known as JIT) to the `check` provider by accepting a `source` parameter (@majormoses)
+* misc development dependencies that were missing (@majormoses)
+
+## [4.1.0] - 2017-12-14
+### Added
+* ability to control `yum_package`'s `flush_cache` parameter by specifying `node['sensu']['yum_flush_cache']`. This allows you to control chefs in memory cache during a `chef-client` run. For more information see [here](https://docs.chef.io/resource_yum.html).
+* `sensu_gem` now optionally accepts a `source` parameter of `String` or `Array` when using an action of `:upgrade`.This could be a local file or a URL. For more information see [here](https://docs.chef.io/resource_gem_package.html)
+
+## [4.0.6] - 2017-09-12
+
+### Fixed
+
+* on systems with restrictive umasks the permissions for rabbitmq ssl directories ended up with permissions that made it non functional. This sets them to the required permissions to make things work (@jessebolson)
+
+## [4.0.5] - 2017-09-12
+
+### Fixed
+
+* `client.json` should now be used by `node['sensu']['user']` rather than `node['sensu']['admin_user']`
+
+## [4.0.4] - 2017-09-12
+
+### Features
+
+* added example in `README.md` how to easily install a bunch of sensu plugins into the emebedded ruby context (@majormoses)
+
+## [4.0.3] - 2017-09-12
+
+### Features
+
+* added support for suse linux (@runningman84)
+
 ## [4.0.2] - 2017-07-06
 
 ### Changes
@@ -243,7 +285,15 @@ Added helpers for storing key/value pairs which persist for duration of the Chef
 
 Allow "standard" as a value of type attribute on `sensu_check` resources, [as described in Sensu documentation](https://sensuapp.org/docs/0.21/checks).
 
-[Unreleased]: https://github.com/sensu/sensu-chef/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/sensu/sensu-chef/compare/v4.3.0...HEAD
+[4.3.0]: https://github.com/sensu/sensu-chef/compare/v4.2.1...v4.3.0
+[4.2.1]: https://github.com/sensu/sensu-chef/compare/v4.2.0...v4.2.1
+[4.2.0]: https://github.com/sensu/sensu-chef/compare/v4.1.0...v4.2.0
+[4.1.0]: https://github.com/sensu/sensu-chef/compare/v4.0.6...v4.1.0
+[4.0.6]: https://github.com/sensu/sensu-chef/compare/v4.0.5..v4.0.6
+[4.0.5]: https://github.com/sensu/sensu-chef/compare/v4.0.4...v4.0.5
+[4.0.4]: https://github.com/sensu/sensu-chef/compare/v4.0.3...v4.0.4
+[4.0.3]: https://github.com/sensu/sensu-chef/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/sensu/sensu-chef/compare/v4.0.0...v4.0.2
 [4.0.0]: https://github.com/sensu/sensu-chef/compare/3.2.0...v4.0.0
 [3.2.0]: https://github.com/sensu/sensu-chef/compare/3.1.2...3.2.0

@@ -4,7 +4,7 @@ maintainer_email "support@sensuapp.com"
 license          "Apache-2.0"
 description      "Installs/Configures Sensu"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          "4.0.3"
+version          "4.3.0"
 
 # available @ https://supermarket.chef.io/cookbooks/apt
 depends "apt", ">= 2.0"
@@ -22,10 +22,13 @@ depends "ms_dotnet", ">= 2.6.1"
 depends "rabbitmq", ">= 2.0.0"
 
 # available @ https://supermarket.chef.io/cookbooks/redisio
-depends "redisio", ">= 1.7.0"
+depends "redisio", ">= 2.7.0"
 
 # available @ https://supermarket.chef.io/cookbooks/chef-vault
 suggests "chef-vault", ">= 1.3.1"
+
+# available @ https://supermarket.chef.io/cookbooks/zypper
+suggests "zypper", ">= 0.4.0"
 
 %w[
   aix
@@ -37,6 +40,7 @@ suggests "chef-vault", ">= 1.3.1"
   scientific
   oracle
   amazon
+  suse
   windows
 ].each do |os|
   supports os
